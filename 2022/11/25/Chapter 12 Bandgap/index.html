@@ -1,0 +1,193 @@
+<!DOCTYPE html><html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="stylesheet" type="text/css" id="themeDefaultStyle" href="stage/build/export/base.css?2.5.1"/>
+    <link rel="stylesheet" type="text/css" id="themeStyle" href="appearance/themes/daylight/theme.css?2.5.1"/>
+    <title>C:\Users\冯理朝\Downloads\Chapter 12 Bandgap - 思源笔记  v2.5.1</title>
+    <style>
+        body {background-color: var(--b3-theme-background);color: var(--b3-theme-on-background)}
+        .b3-typography, .protyle-wysiwyg, .protyle-title {font-size:16px !important}
+.b3-typography code:not(.hljs), .protyle-wysiwyg span[data-type~=code] { font-variant-ligatures: none }
+.li > .protyle-action {height:34px;line-height: 34px}
+.protyle-wysiwyg [data-node-id].li > .protyle-action ~ .h1, .protyle-wysiwyg [data-node-id].li > .protyle-action ~ .h2, .protyle-wysiwyg [data-node-id].li > .protyle-action ~ .h3, .protyle-wysiwyg [data-node-id].li > .protyle-action ~ .h4, .protyle-wysiwyg [data-node-id].li > .protyle-action ~ .h5, .protyle-wysiwyg [data-node-id].li > .protyle-action ~ .h6 {line-height:34px;}
+.protyle-wysiwyg [data-node-id].li > .protyle-action:after {height: 16px;width: 16px;margin:-8px 0 0 -8px}
+.protyle-wysiwyg [data-node-id].li > .protyle-action svg {height: 14px}
+.protyle-wysiwyg [data-node-id] [spellcheck="false"] {min-height:26px;}
+.protyle-wysiwyg [data-node-id] {}
+.protyle-wysiwyg .li {min-height:34px}
+.protyle-gutters button svg {height:26px}
+.protyle-wysiwyg img.emoji, .b3-typography img.emoji {width:18px}
+.protyle-wysiwyg .h1 img.emoji, .b3-typography h1 img.emoji {width:35px}
+.protyle-wysiwyg .h2 img.emoji, .b3-typography h2 img.emoji {width:31px}
+.protyle-wysiwyg .h3 img.emoji, .b3-typography h3 img.emoji {width:27px}
+.protyle-wysiwyg .h4 img.emoji, .b3-typography h4 img.emoji {width:25px}
+.protyle-wysiwyg .h5 img.emoji, .b3-typography h5 img.emoji {width:22px}
+.protyle-wysiwyg .h6 img.emoji, .b3-typography h6 img.emoji {width:20px}
+    </style>
+</head>
+<body>
+<div class="b3-typography" style="max-width: 800px;margin: 0 auto;" id="preview"><h1 id="Chapter-12-Bandgap">Chapter 12 Bandgap</h1>
+<h1 id="Bandgap-是什么">Bandgap 是什么</h1>
+<p updated="20221125140422">　　第一次听到这个名字，学过半导体物理的人的第一反应应该是硅原子带隙 1.12eV。但这里指的是模拟电路中的电压/电流<span data-type="strong">基准源</span>，名叫 Bandgap reference（但这个名字确实跟原子带隙有关系）</p>
+<p updated="20221125140422">　　其设计目的是：保证在 PVT 的变化下，输出是一个十分稳定的电压/电流值。其中 P (Process)工艺无关，V(Voltage)电压无关，T(Temperature)温度无关。</p>
+<p updated="20221125140422">　　一个稳定的基准源对于模拟电路来说至关重要，模拟电路的大部分模块都需要一个 reference，这个 reference 就是由 Bandgap 提供的，尤其是一些高精度的信号链模块如高精度运放，ADDA 数模转换器，对 bandgap 更加严苛</p>
+<h1 id="设计思路">设计思路</h1>
+<p updated="20221125140422">　　虽然刚刚讲到 PVT 无关这三个指标，但其最基本的设计思路是从 T(Temperature)温度无关开始的。简单来说就是用一个正温度系数电压和负温度系数电压相抵消就得到了一个 0 温度系数电压了。</p>
+<div data-content="V_{BG}=V_{BE1}+\alpha \cdot\Delta V_{BE}" data-subtype="math"><div spin="1"></div></div>
+<h2 id="负温度系数--CTAT-电压">负温度系数 (CTAT)电压</h2>
+<p updated="20221125140422">　　CTAT 全称是 Complementary To Absolute Temperature，也有叫做负温度系数电压的，我们一般直接称呼它为 <span data-type="inline-math" data-subtype="math" data-content="V_{BE}" contenteditable="false" class="render-node"></span>。pn 节的正向导通电流可以提供，或者将 BJT 的基极和集电极连接起来也可以。直接给结论就是（详见拉扎维 12.3.1）</p>
+<div data-content="\frac{\partial \Delta V_{BE}}{\partial T} = \frac{V_{BE}-(4+m)V_T-E_g/q}{T}" data-subtype="math"><div spin="1"></div></div>
+<p updated="20221125140422">　　这个数在 <span data-type="inline-math" data-subtype="math" data-content="V_{BE}=750mV, \ T=300K" contenteditable="false" class="render-node"></span> 的时候大概是 <span data-type="inline-math" data-subtype="math" data-content="\partial \Delta V_{BE}/\partial T=-1.5mV/K" contenteditable="false" class="render-node"></span></p>
+<p updated="20221125140422">　　（似乎跟放大系数 β 也有关系，关系到二阶系数补偿，待补充）</p>
+<h2 id="正温度系数--PTAT-电压">正温度系数 (PTAT)电压</h2>
+<p updated="20221125140422">　　PTAT 全称是 Proportional To Absolute Temperature，是用两个<span data-type="strong">电流大小不同</span>的电流去灌 BJT 而产生的电压差，我们一般称呼它为 <span data-type="inline-math" data-subtype="math" data-content="\Delta V_{BE}" contenteditable="false" class="render-node"></span>。​<span class="img" style="width: 50%; display: block;"><img src="assets/截屏2022-11-22 下午3.55.39-20221122155544-m6nb5j7.png" alt="PTAT" style="width: 10000px;" parent-style="width: 50%; display: block;" /></span></p>
+<p updated="20221125140422">　　对于单个 pn 节，其正向导通电流与电压的关系为</p>
+<div data-content="I_C=I_Sexp(\frac{V_{BE}}{V_T}) \Rightarrow V_{BE}=V_T\ln{\frac{I_C}{I_S}}" data-subtype="math"><div spin="1"></div></div>
+<p updated="20221125140422">　　对于两个不同电流密度的 BJT，产生的电压差为</p>
+<div data-content="\begin{align*}
+\Delta V_{BE}&amp;=V_T\ln{\frac{nI_0}{I_{S1}}}-V_T\ln{\frac{I_0}{I_{S2}}} \\ &amp;= V_T \ln n
+\end{align*}" data-subtype="math"><div spin="1"></div></div>
+<p updated="20221125140422">　　（I<span data-type="sub">S1</span> 和 I<span data-type="sub">S2</span> 一般是一样的，但是实际电路中 I<span data-type="sub">S</span> 不同将会影响精度）</p>
+<p updated="20221125140422">　　那怎么实现电压的减法呢？当然想到的是利用运算放大器作电压钳制，强制正负输入端电压相等。然后再用利用电阻做减法运算（电流=电阻两端电压相减/电阻阻值），见下图“简单Bandgap的实现电路”。</p>
+<h2 id="简单Bandgap">简单Bandgap</h2>
+<p updated="20221125140422">　　<br /><span class="img" style="width: 50%; display: block; max-width: 294px;"><img src="assets/截屏2022-11-22 下午4.25.21-20221122162526-p9nzngo.png" alt="截屏2022-11-22 下午4.25.21" title="简单Bandgap的实现电路" style="width: 10000px;" parent-style="width: 50%; display: block; max-width: 294px;" /><span class="protyle-action__title">简单Bandgap的实现电路</span></span></p>
+<p updated="20221125140422">　　这个图里面的R1和R2负责控制电流大小，阻值应该相等，电流大小也相等。之前说过，PTAT电压的产生要求流经BTJ的电流大小不相等，那么这里在右侧支路并联n个BJT就可以了。</p>
+<p updated="20221125140422">　　其中R3/R2这个电阻比值和n值非常重要，这个关系到正温度系数和负温度系数电压是否能完美补偿为0温度系数。因为负温度系数电压<span data-type="inline-math" data-subtype="math" data-content="\partial \Delta V_{BE}/\partial T=-1.5mV/K" contenteditable="false" class="render-node"></span>，但是<span data-type="inline-math" data-subtype="math" data-content="\partial \Delta V_{T}/\partial T=0.087mV/K" contenteditable="false" class="render-node"></span>，所以正温度系数应该乘以<span data-type="strong">17.2倍</span>才能抵消掉负温度系数<span data-type="inline-math" data-subtype="math" data-content="\frac{\partial \Delta V_{BE}}{\partial T}+17.2\frac{\partial \Delta V_{T}}{\partial T}=0mV/K" contenteditable="false" class="render-node"></span>。</p>
+<p updated="20221125140422">　　写出这个简单电路的完整公式</p>
+<div data-content="V_{out}=V_{BE}+\left(1+\frac{R_{2}}{R_{3}}\right) V_{T}\ln{}{n}" data-subtype="math"><div spin="1"></div></div>
+<p updated="20221125140422">　　可以看出来这个17.2由<span data-type="inline-math" data-subtype="math" data-content="\frac{R_{2}}{R_{3}}" contenteditable="false" class="render-node"></span>和<span data-type="inline-math" data-subtype="math" data-content="\ln n" contenteditable="false" class="render-node"></span>两部分组成，调配好系数后最终得到Vout的值<br />
+直接说结论了，调配完成<span data-type="inline-math" data-subtype="math" data-content="V_{out}=1.25V" contenteditable="false" class="render-node"></span></p>
+<h1 id="Op-Amp-Offset--运放失调-">Op Amp Offset (运放失调)</h1>
+<p updated="20221125140422">　　在所有影响Bandgap精度因素中，<span data-type="strong">运放失调是影响最严重的</span>，而运放的失调来源于内部结构在生产工艺过程中产生的不对称性，尤其是输入对管（详见拉扎维14章）<br />
+<span class="img" style="width: 50%; display: block;"><img src="assets/net-img-1667788930929-0e52b247-2c86-409d-abea-749ab6f73706-20221118131511-vqr9k6w.png" alt="image.png" style="width: 10000px;" parent-style="width: 50%; display: block;" /></span></p>
+<h2 id="失调带来的影响">失调带来的影响</h2>
+<p updated="20221125140422">　　<span data-type="inline-math" data-subtype="math" data-content="V_{out}=V_{BE}+\left(1+\frac{R_{2}}{R_{3}}\right) \left( V_{T}\ln{}{n}-V_{OS}\right)" contenteditable="false" class="render-node"></span><br />
+在输出端，运放的失调电压 <span data-type="inline-math" data-subtype="math" data-content="V_{OS}" contenteditable="false" class="render-node"></span> 被放大 <span data-type="inline-math" data-subtype="math" data-content="1+\frac{R_{2}}{R_{3}}" contenteditable="false" class="render-node"></span> 倍</p>
+<h2 id="减少运放失调的影响">减少运放失调的影响</h2>
+<p updated="20221125140422">　　首先假设运放无法消除（实际上可以用 Chopper 消除），那么我们就应该去思考如何去减少它产生的影响。我们从两方面去思考减少运放失调影响的方法。一个是从运放本身的角度考虑，一个是用大电压盖过 <span data-type="inline-math" data-subtype="math" data-content="V_{OS}" contenteditable="false" class="render-node"></span> 的影响。</p>
+<ol updated="20221125140422">
+<li id="20221125140422-vb548gs" updated="20221125140422">
+<p updated="20221125140422">运放本身，可以采用大尺寸输入器件，并采取合理版图布局以减小失配</p>
+</li>
+<li id="20221125140422-tsgu5oy" updated="20221125140422">
+<p updated="20221125140422">增大 Q1 和 Q2 两条支路的电流比率，将 <span data-type="inline-math" data-subtype="math" data-content="\Delta V_{BE}=V_{T}\ln{}{n}" contenteditable="false" class="render-node"></span> 变为 <span data-type="inline-math" data-subtype="math" data-content="\Delta V_{BE}=V_{T}\ln{}{mn}" contenteditable="false" class="render-node"></span></p>
+</li>
+<li id="20221125140422-9nab4np" updated="20221125140422">
+<p updated="20221125140422">电路的每条分支多串一个 PN 结，使得 <span data-type="inline-math" data-subtype="math" data-content="\Delta V_{BE}" contenteditable="false" class="render-node"></span> 增加一倍</p>
+</li>
+</ol>
+<p updated="20221125140422">　　​<span class="img" style="width: 50%; display: block;"><img src="assets/net-img-1667793711043-f7e102d7-5583-44f8-894a-7d7553829f6a-20221118131511-dkjxinh.png" alt="image.png" title="同时使用方法2,3的电路实现" style="width: 10000px;" parent-style="width: 50%; display: block;" /><span class="protyle-action__title">同时使用方法2,3的电路实现</span></span><br />
+上图的公式变为 <span data-type="inline-math" data-subtype="math" data-content="V_{out}=2V_{BE}+\left(1+\frac{R_{2}}{R_{3}}\right) \left( 2V_{T}\ln{}{mn}-V_{OS}\right)" contenteditable="false" class="render-node"></span><br />
+从这个公式中可以看出此结构的局限性，即<span data-type="strong">无法应用于低压条件</span>，多串联一个 PN 结使得电压裕度进一步缩小，并且待温度系数平衡时候，输出电压也加倍了 <span data-type="inline-math" data-subtype="math" data-content="V_{out}=2\times 1.25V=2.5V" contenteditable="false" class="render-node"></span><br />
+而且这样的结构还<span data-type="strong">需要进一步改进</span></p>
+<ul updated="20221125140422">
+<li id="20221125140422-dpf3dx9" updated="20221125140422">
+<p updated="20221125140422"><span data-type="strong">偏置电流不能由电阻提供</span>，因为晶体管的偏置需要有相同的温度特性，这里要换成 PMOS 电流源。</p>
+</li>
+<li id="20221125140422-d4w4rye" updated="20221125140422">
+<p updated="20221125140422"><span data-type="strong">不符合CMOS工艺</span>，为了在 CMOS 的 N 阱工艺中做出 PNP，得采取下图的方式。其中 N 阱作基极(Base)，P 衬底作集级(Collector)，而 P-Sub 必定接地，所以上图的 Q2，Q4 的 Collector 也必须接地。</p>
+</li>
+</ul>
+<p updated="20221125140422">　　​<span class="img" style="width: 50%; display: block;"><img src="assets/net-img-1667799081820-63927085-dc0e-4118-a85a-80631e82aeab-20221118131511-n1oanj7.png" alt="截屏 2022-11-07 下午 1.31.16.png" title="N阱工艺中做出PNP" style="width: 10000px;" parent-style="width: 50%; display: block;" /><span class="protyle-action__title">N阱工艺中做出PNP</span></span><br />
+​<span class="img" style="width: 50%; display: block;"><img src="assets/net-img-1667799921175-a7f40f51-9904-448c-a0af-ec3f9faa3094-20221118131511-0dbtay5.png" alt="截屏 2022-11-07 下午 1.45.17.png" title="改进后的电路" style="width: 10000px;" parent-style="width: 50%; display: block;" /><span class="protyle-action__title">改进后的电路</span></span></p>
+<p updated="20221125140422">　　但是 Q2 和 Q4 的有基极电流，也会造成误差</p>
+<p updated="20221125140422">　　‍</p>
+<h1 id="Low-Voltage-Bandgap-References--低压带隙基准-">Low-Voltage Bandgap References (低压带隙基准)</h1>
+<p updated="20221125140422">　　做低压结构之前，首先要明确为什么之前的结构的输出电压降不下去。根本原因在于 <span data-type="inline-math" data-subtype="math" data-content="V_{BE}" contenteditable="false" class="render-node"></span>（负温度系数电压）无法调整，然后我们又需要约 17.2 个 <span data-type="inline-math" data-subtype="math" data-content="V_{T}" contenteditable="false" class="render-node"></span>（正温度系数电压）来平衡掉 <span data-type="inline-math" data-subtype="math" data-content="V_{BE}" contenteditable="false" class="render-node"></span>，最后平衡的结果就是 1.25V<br />
+而低压 Bandgap 的中心思想就是使得 <span data-type="inline-math" data-subtype="math" data-content="V_{BE}" contenteditable="false" class="render-node"></span> 可调。利用 <span data-type="inline-math" data-subtype="math" data-content="V_{BE}/R" contenteditable="false" class="render-node"></span> 产生负温度系数电流(CTAT)，以对应 PTAT 电流 <span data-type="inline-math" data-subtype="math" data-content="V_{T}\ln{}{n}/R" contenteditable="false" class="render-node"></span><br />
+​<span class="img" style="width: 50%; display: block;"><img src="assets/net-img-1667801235831-8a65991a-5443-4691-aa4d-57e48a2bd5fa-20221118131512-asz9von.png" alt="image.png" title="低压Bandgap结构" style="width: 10000px;" parent-style="width: 50%; display: block;" /><span class="protyle-action__title">低压Bandgap结构</span></span></p>
+<p updated="20221125140422">　　最低电源电压 <span data-type="inline-math" data-subtype="math" data-content="V_{DD}" contenteditable="false" class="render-node"></span> 要求为 <span data-type="inline-math" data-subtype="math" data-content="V_{BE1}+ \left| V_{DS1}\right|" contenteditable="false" class="render-node"></span><br />
+完整表达式 <span data-type="inline-math" data-subtype="math" data-content="V_{BG}=\frac{R_{4}}{R_{2}} \left(V_{BE1}+\frac{R_{2}}{R_{1}}V_{T}\ln{n} \right)" contenteditable="false" class="render-node"></span><br />
+若考虑失调电压 <span data-type="inline-math" data-subtype="math" data-content="V_{BG}=\frac{R_{4}}{R_{2}} \left(V_{BE1}+\frac{R_{2}}{R_{1}}V_{T}\ln{n} -\left( 1+\frac{R_{2}}{R_{1}}\right) V_{OS}\right)" contenteditable="false" class="render-node"></span><br />
+简单理解此表达式 <span data-type="inline-math" data-subtype="math" data-content="V_{BG}=\frac{R_{4}}{R_{2}}V_{REF}" contenteditable="false" class="render-node"></span>，<span data-type="inline-math" data-subtype="math" data-content="\frac{R_{4}}{R_{2}}" contenteditable="false" class="render-node"></span> 用于调节输出值，而 <span data-type="inline-math" data-subtype="math" data-content="\frac{R_{2}}{R_{1}}" contenteditable="false" class="render-node"></span> 用于平衡正负温度系数</p>
+<h1 id="启动及稳定性问题">启动及稳定性问题</h1>
+<h1 id="其他考虑-速度-电源抑制-噪声-输出阻抗-">其他考虑（速度，电源抑制，噪声，输出阻抗）</h1>
+<h1 id="实际电路">实际电路</h1>
+<h2 id="电压模">电压模</h2>
+<p updated="20221125140422">　　​<span class="img"><img src="assets/image-20221122165433-gaxopma.png" alt="image" /></span>​</p>
+<h2 id="电流模--低压结构-">电流模 (低压结构)</h2>
+<p updated="20221125140422">　　​<span class="img"><img src="assets/image-20221122165735-8m9mrdm.png" alt="image" /></span>​</p>
+<h1 id="高阶运用">高阶运用</h1>
+<p updated="20221125140422">　　源自 2011 年 JSSC 的一篇 bandgap 设计经典论文<span data-type="strong">“A Single-Trim CMOS Bandgap Reference With a 3δ Inaccuracy of 0.15% From 40C to 125C”（代尔夫特的大佬们，膜）</span><a href="assets/Bandgap_Ge_JSSC2011-20221120111908-x8ht5an.pdf">Bandgap_Ge_JSSC2011.pdf</a></p>
+<p updated="20221125140422">　　国内博客也有一些写的很好的文章解读<br />
+<a href="https://zhuanlan.zhihu.com/p/576098454">https://zhuanlan.zhihu.com/p/576098454</a><br />
+<a href="https://blog.eetop.cn/blog-1395527-6946327.html">https://blog.eetop.cn/blog-1395527-6946327.html</a></p>
+<h2 id="Trimming">Trimming</h2>
+<p updated="20221125140422">　　根据这篇论文，仅用单点校准（Single-Trim）</p>
+<h2 id="Curvature-Correction">Curvature Correction</h2>
+<p updated="20221125140422">　　也叫二阶温度系数补偿（待补充）</p>
+<h2 id="Offset-Cancellation---Chopping-Technique">Offset Cancellation - Chopping Technique</h2>
+<p updated="20221125140422">　　Chopping 的原理：周期性的将运放输入端交换，同时保证运放的正负反馈极性不变<br />
+<span class="img" style="width: 67%; display: block;"><img src="assets/net-img-1668343580573-1014e271-6a62-4c42-9beb-b1b7707f0fb6-20221118131511-0rb604n.png" alt="image.png" style="width: 10000px;" parent-style="width: 67%; display: block;" /></span><br />
+以全差分折叠式共源共栅为例<br />
+<span class="img" style="width: 67%; display: block;"><img src="assets/net-img-1668343798589-d88aa5aa-995c-4274-bdd3-990a6aa2b05a-20221118131511-pe8j874.png" alt="image.png" style="width: 10000px;" parent-style="width: 67%; display: block;" /></span><br />
+<span class="img" style="width: 67%; display: block;"><img src="assets/net-img-1668343829428-05cd5069-d263-4e55-a78a-e8f903cdf826-20221118131511-xe4md0z.png" alt="image.png" style="width: 10000px;" parent-style="width: 67%; display: block;" /></span></p>
+<p updated="20221125140422">　　‍</p>
+<p updated="20221125140422">　　但是由于时钟的引入和运放极性的周期性变换，运放的输出端会产生一个ripple，不过这个ripple的频率是已知的，所以</p>
+<p updated="20221125140422">　　‍</p>
+<h1 id="常见问题和总结">常见问题和总结</h1>
+<p updated="20221125140422">　　Q1: 为什么<span data-type="strong">低压结构</span>的启动电路更难做<br />
+A1: 因为对电流的大小有比较严格的要求，当电流较小的时候，电流只能通过电阻，此时 BJT 未开启，于是运放输入两端难以形成负反馈 &gt; 正反馈</p>
+<p updated="20221125140422">　　Q2: 输出的精度会被哪些因素影响，应该怎么改善<br />
+A2: 按照元器件来分，有如下几个方面</p>
+<ul updated="20221125140422">
+<li id="20221125140422-7v2hobj" updated="20221125140422">
+<p updated="20221125140422"><span data-type="strong">运放的offset</span>，这是最大的影响，源于运放内部的对管在生产过程中产生的不匹配。从最基础的运放设计来说，运放 offset 输出管可以做大，以减少边缘效应，然后合理的版图摆放也是必不可少。但想要真正消除 offset，就得用上 chopper</p>
+</li>
+<li id="20221125140422-zbmbmmy" updated="20221125140422">
+<p updated="20221125140422"><span data-type="strong">运放增益过小</span>导致运放输入正负端电压差太大。运放的增益至少要 40dB 以上，单级的 Folded-Cascode 就可以达到</p>
+</li>
+<li id="20221125140422-kg3uca9" updated="20221125140422">
+<p updated="20221125140422"><span data-type="strong">电流镜的不匹配</span>，源自沟道长度调制效应 (Channel Length Modulation)，从电路的角度去理解就是输出阻抗太小，应该增大沟道长度 L（还对 Vth 的失配有好处），还可以做成 Cascode 结构。</p>
+</li>
+<li id="20221125140422-dfon4s8" updated="20221125140422">
+<p updated="20221125140422"><span data-type="strong">BJT的不匹配</span>，BJT 的放大系数 β 值，详见高阶应用-Curvature Correction（待补充）</p>
+</li>
+</ul>
+<p updated="20221125140422">　　Q3: 噪声应该怎么减小<br />
+A3: 输出端应该挂电容以减少高频噪声；电流镜的 Gate 端挂 RC 滤掉闪烁噪声</p>
+<p updated="20221125140422">　　Q4: 为啥 Bandgap 仿真温漂的时候，是个抛物线<span data-type="strong">开口向下</span>的曲线？</p>
+<p updated="20221125140422">　　Q4: BJT 能不能换成二极管？</p>
+<p updated="20221125140422">　　Q5: 运放为啥要单级运放？能不能用二级运放？对带宽有无要求？</p>
+<p updated="20221125140422">　　‍</p>
+</div>
+<script src="appearance/icons/material/icon.js?2.5.1"></script>
+<script src="stage/build/export/protyle-method.js?2.5.1"></script>
+<script src="stage/protyle/js/lute/lute.min.js?2.5.1"></script>    
+<script>
+    window.siyuan = {
+      config: {
+        appearance: { mode: 0, codeBlockThemeDark: "base16/dracula", codeBlockThemeLight: "github" },
+        editor: { 
+          codeLineWrap: true,
+          codeLigatures: false,
+          plantUMLServePath: "https://www.plantuml.com/plantuml/svg/~1",
+          codeSyntaxHighlightLineNum: true,
+          katexMacros: JSON.stringify({}),
+        }
+      },
+      languages: {copy:"复制"}
+    };
+    const previewElement = document.getElementById('preview');
+    Protyle.highlightRender(previewElement, "stage/protyle");
+    Protyle.mathRender(previewElement, "stage/protyle", false);
+    Protyle.mermaidRender(previewElement, "stage/protyle");
+    Protyle.flowchartRender(previewElement, "stage/protyle");
+    Protyle.graphvizRender(previewElement, "stage/protyle");
+    Protyle.chartRender(previewElement, "stage/protyle");
+    Protyle.mindmapRender(previewElement, "stage/protyle");
+    Protyle.abcRender(previewElement, "stage/protyle");
+    Protyle.plantumlRender(previewElement, "stage/protyle");
+    document.querySelectorAll(".protyle-action__copy").forEach((item) => {
+      item.addEventListener("click", (event) => {
+            navigator.clipboard.writeText(item.parentElement.nextElementSibling.textContent.trimEnd());
+            event.preventDefault();
+            event.stopPropagation();
+      })
+    });
+</script></body></html>

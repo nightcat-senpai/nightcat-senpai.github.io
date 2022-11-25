@@ -4,17 +4,19 @@
   <meta charset="utf-8">
   
   
-  <title>Hexo</title>
+  <title>Analog Design Wizard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Hexo">
+  <meta name="description" content="模拟IC学习笔记">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Analog Design Wizard">
 <meta property="og:url" content="http://example.com/index.html">
-<meta property="og:site_name" content="Hexo">
-<meta property="og:locale" content="en_US">
-<meta property="article:author" content="John Doe">
+<meta property="og:site_name" content="Analog Design Wizard">
+<meta property="og:description" content="模拟IC学习笔记">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:author" content="NighCat-Senpai">
 <meta name="twitter:card" content="summary">
   
-    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+    <link rel="alternate" href="/atom.xml" title="Analog Design Wizard" type="application/atom+xml">
   
   
     <link rel="shortcut icon" href="/favicon.png">
@@ -42,7 +44,7 @@
   <div id="header-outer" class="outer">
     <div id="header-title" class="inner">
       <h1 id="logo-wrap">
-        <a href="/" id="logo">Hexo</a>
+        <a href="/" id="logo">Analog Design Wizard</a>
       </h1>
       
     </div>
@@ -57,12 +59,12 @@
       </nav>
       <nav id="sub-nav">
         
-          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS 订阅"></a>
         
-        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
       </nav>
       <div id="search-form-wrap">
-        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
       </div>
     </div>
   </div>
@@ -70,6 +72,143 @@
 
       <div class="outer">
         <section id="main">
+  
+    <article id="post-Chapter 12 Bandgap" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/11/25/Chapter%2012%20Bandgap/" class="article-date">
+  <time class="dt-published" datetime="2022-11-25T06:01:47.308Z" itemprop="datePublished">2022-11-25</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h1 id="Chapter-12-Bandgap"><a href="#Chapter-12-Bandgap" class="headerlink" title="Chapter 12 Bandgap"></a>Chapter 12 Bandgap</h1><h1 id="Bandgap-是什么"><a href="#Bandgap-是什么" class="headerlink" title="Bandgap 是什么"></a>Bandgap 是什么</h1><p>　　第一次听到这个名字，学过半导体物理的人的第一反应应该是硅原子带隙 1.12eV。但这里指的是模拟电路中的电压&#x2F;电流<strong>基准源</strong>，名叫 Bandgap reference（但这个名字确实跟原子带隙有关系）</p>
+<p>　　其设计目的是：保证在 PVT 的变化下，输出是一个十分稳定的电压&#x2F;电流值。其中 P (Process)工艺无关，V(Voltage)电压无关，T(Temperature)温度无关。</p>
+<p>　　一个稳定的基准源对于模拟电路来说至关重要，模拟电路的大部分模块都需要一个 reference，这个 reference 就是由 Bandgap 提供的，尤其是一些高精度的信号链模块如高精度运放，ADDA 数模转换器，对 bandgap 更加严苛</p>
+<h1 id="设计思路"><a href="#设计思路" class="headerlink" title="设计思路"></a>设计思路</h1><p>　　虽然刚刚讲到 PVT 无关这三个指标，但其最基本的设计思路是从 T(Temperature)温度无关开始的。简单来说就是用一个正温度系数电压和负温度系数电压相抵消就得到了一个 0 温度系数电压了。</p>
+<p>$$<br>V_{BG}&#x3D;V_{BE1}+\alpha \cdot\Delta V_{BE}<br>$$</p>
+<h2 id="负温度系数-CTAT-电压"><a href="#负温度系数-CTAT-电压" class="headerlink" title="负温度系数 (CTAT)电压"></a>负温度系数 (CTAT)电压</h2><p>　　CTAT 全称是 Complementary To Absolute Temperature，也有叫做负温度系数电压的，我们一般直接称呼它为 $V_{BE}$。pn 节的正向导通电流可以提供，或者将 BJT 的基极和集电极连接起来也可以。直接给结论就是（详见拉扎维 12.3.1）</p>
+<p>$$<br>\frac{\partial \Delta V_{BE}}{\partial T} &#x3D; \frac{V_{BE}-(4+m)V_T-E_g&#x2F;q}{T}<br>$$</p>
+<p>　　这个数在 $V_{BE}&#x3D;750mV, \ T&#x3D;300K$ 的时候大概是 $\partial \Delta V_{BE}&#x2F;\partial T&#x3D;-1.5mV&#x2F;K$</p>
+<p>　　（似乎跟放大系数 β 也有关系，关系到二阶系数补偿，待补充）</p>
+<h2 id="正温度系数-PTAT-电压"><a href="#正温度系数-PTAT-电压" class="headerlink" title="正温度系数 (PTAT)电压"></a>正温度系数 (PTAT)电压</h2><p>　　PTAT 全称是 Proportional To Absolute Temperature，是用两个<strong>电流大小不同</strong>的电流去灌 BJT 而产生的电压差，我们一般称呼它为 $\Delta V_{BE}$。​![PTAT](assets&#x2F;截屏2022-11-22 下午3.55.39-20221122155544-m6nb5j7.png)</p>
+<p>　　对于单个 pn 节，其正向导通电流与电压的关系为</p>
+<p>$$<br>I_C&#x3D;I_Sexp(\frac{V_{BE}}{V_T}) \Rightarrow V_{BE}&#x3D;V_T\ln{\frac{I_C}{I_S}}<br>$$</p>
+<p>　　对于两个不同电流密度的 BJT，产生的电压差为</p>
+<p>$$<br>\begin{align*}<br>\Delta V_{BE}&amp;&#x3D;V_T\ln{\frac{nI_0}{I_{S1}}}-V_T\ln{\frac{I_0}{I_{S2}}} \ &amp;&#x3D; V_T \ln n<br>\end{align*}<br>$$</p>
+<p>　　（I<del>S1</del> 和 I<del>S2</del> 一般是一样的，但是实际电路中 I<del>S</del> 不同将会影响精度）</p>
+<p>　　那怎么实现电压的减法呢？当然想到的是利用运算放大器作电压钳制，强制正负输入端电压相等。然后再用利用电阻做减法运算（电流&#x3D;电阻两端电压相减&#x2F;电阻阻值），见下图“简单Bandgap的实现电路”。</p>
+<h2 id="简单Bandgap"><a href="#简单Bandgap" class="headerlink" title="简单Bandgap"></a>简单Bandgap</h2><p>　　<br />![截屏2022-11-22 下午4.25.21](assets&#x2F;截屏2022-11-22 下午4.25.21-20221122162526-p9nzngo.png “简单Bandgap的实现电路”)</p>
+<p>　　这个图里面的R1和R2负责控制电流大小，阻值应该相等，电流大小也相等。之前说过，PTAT电压的产生要求流经BTJ的电流大小不相等，那么这里在右侧支路并联n个BJT就可以了。</p>
+<p>　　其中R3&#x2F;R2这个电阻比值和n值非常重要，这个关系到正温度系数和负温度系数电压是否能完美补偿为0温度系数。因为负温度系数电压$\partial \Delta V_{BE}&#x2F;\partial T&#x3D;-1.5mV&#x2F;K$，但是$\partial \Delta V_{T}&#x2F;\partial T&#x3D;0.087mV&#x2F;K$，所以正温度系数应该乘以<strong>17.2倍</strong>才能抵消掉负温度系数$\frac{\partial \Delta V_{BE}}{\partial T}+17.2\frac{\partial \Delta V_{T}}{\partial T}&#x3D;0mV&#x2F;K$。</p>
+<p>　　写出这个简单电路的完整公式</p>
+<p>$$<br>V_{out}&#x3D;V_{BE}+\left(1+\frac{R_{2}}{R_{3}}\right) V_{T}\ln{}{n}<br>$$</p>
+<p>　　可以看出来这个17.2由$\frac{R_{2}}{R_{3}}$和$\ln n$两部分组成，调配好系数后最终得到Vout的值<br>直接说结论了，调配完成$V_{out}&#x3D;1.25V$</p>
+<h1 id="Op-Amp-Offset-运放失调"><a href="#Op-Amp-Offset-运放失调" class="headerlink" title="Op Amp Offset (运放失调)"></a>Op Amp Offset (运放失调)</h1><p>　　在所有影响Bandgap精度因素中，<strong>运放失调是影响最严重的</strong>，而运放的失调来源于内部结构在生产工艺过程中产生的不对称性，尤其是输入对管（详见拉扎维14章）<br><img src="/assets/net-img-1667788930929-0e52b247-2c86-409d-abea-749ab6f73706-20221118131511-vqr9k6w.png" alt="image.png"></p>
+<h2 id="失调带来的影响"><a href="#失调带来的影响" class="headerlink" title="失调带来的影响"></a>失调带来的影响</h2><p>　　$V_{out}&#x3D;V_{BE}+\left(1+\frac{R_{2}}{R_{3}}\right) \left( V_{T}\ln{}{n}-V_{OS}\right)$<br>在输出端，运放的失调电压 $V_{OS}$ 被放大 $1+\frac{R_{2}}{R_{3}}$ 倍</p>
+<h2 id="减少运放失调的影响"><a href="#减少运放失调的影响" class="headerlink" title="减少运放失调的影响"></a>减少运放失调的影响</h2><p>　　首先假设运放无法消除（实际上可以用 Chopper 消除），那么我们就应该去思考如何去减少它产生的影响。我们从两方面去思考减少运放失调影响的方法。一个是从运放本身的角度考虑，一个是用大电压盖过 $V_{OS}$ 的影响。</p>
+<ol>
+<li>运放本身，可以采用大尺寸输入器件，并采取合理版图布局以减小失配</li>
+<li>增大 Q1 和 Q2 两条支路的电流比率，将 $\Delta V_{BE}&#x3D;V_{T}\ln{}{n}$ 变为 $\Delta V_{BE}&#x3D;V_{T}\ln{}{mn}$</li>
+<li>电路的每条分支多串一个 PN 结，使得 $\Delta V_{BE}$ 增加一倍</li>
+</ol>
+<p>　　​<img src="/assets/net-img-1667793711043-f7e102d7-5583-44f8-894a-7d7553829f6a-20221118131511-dkjxinh.png" alt="image.png" title="同时使用方法2,3的电路实现"><br>上图的公式变为 $V_{out}&#x3D;2V_{BE}+\left(1+\frac{R_{2}}{R_{3}}\right) \left( 2V_{T}\ln{}{mn}-V_{OS}\right)$<br>从这个公式中可以看出此结构的局限性，即<strong>无法应用于低压条件</strong>，多串联一个 PN 结使得电压裕度进一步缩小，并且待温度系数平衡时候，输出电压也加倍了 $V_{out}&#x3D;2\times 1.25V&#x3D;2.5V$<br>而且这样的结构还<strong>需要进一步改进</strong></p>
+<ul>
+<li><strong>偏置电流不能由电阻提供</strong>，因为晶体管的偏置需要有相同的温度特性，这里要换成 PMOS 电流源。</li>
+<li><strong>不符合CMOS工艺</strong>，为了在 CMOS 的 N 阱工艺中做出 PNP，得采取下图的方式。其中 N 阱作基极(Base)，P 衬底作集级(Collector)，而 P-Sub 必定接地，所以上图的 Q2，Q4 的 Collector 也必须接地。</li>
+</ul>
+<p>　　​<img src="/assets/net-img-1667799081820-63927085-dc0e-4118-a85a-80631e82aeab-20221118131511-n1oanj7.png" alt="截屏 2022-11-07 下午 1.31.16.png" title="N阱工艺中做出PNP"><br>​<img src="/assets/net-img-1667799921175-a7f40f51-9904-448c-a0af-ec3f9faa3094-20221118131511-0dbtay5.png" alt="截屏 2022-11-07 下午 1.45.17.png" title="改进后的电路"></p>
+<p>　　但是 Q2 和 Q4 的有基极电流，也会造成误差</p>
+<p>　　‍</p>
+<h1 id="Low-Voltage-Bandgap-References-低压带隙基准"><a href="#Low-Voltage-Bandgap-References-低压带隙基准" class="headerlink" title="Low-Voltage Bandgap References (低压带隙基准)"></a>Low-Voltage Bandgap References (低压带隙基准)</h1><p>　　做低压结构之前，首先要明确为什么之前的结构的输出电压降不下去。根本原因在于 $V_{BE}$（负温度系数电压）无法调整，然后我们又需要约 17.2 个 $V_{T}$（正温度系数电压）来平衡掉 $V_{BE}$，最后平衡的结果就是 1.25V<br>而低压 Bandgap 的中心思想就是使得 $V_{BE}$ 可调。利用 $V_{BE}&#x2F;R$ 产生负温度系数电流(CTAT)，以对应 PTAT 电流 $V_{T}\ln{}{n}&#x2F;R$<br>​<img src="/assets/net-img-1667801235831-8a65991a-5443-4691-aa4d-57e48a2bd5fa-20221118131512-asz9von.png" alt="image.png" title="低压Bandgap结构"></p>
+<p>　　最低电源电压 $V_{DD}$ 要求为 $V_{BE1}+ \left| V_{DS1}\right|$<br>完整表达式 $V_{BG}&#x3D;\frac{R_{4}}{R_{2}} \left(V_{BE1}+\frac{R_{2}}{R_{1}}V_{T}\ln{n} \right)$<br>若考虑失调电压 $V_{BG}&#x3D;\frac{R_{4}}{R_{2}} \left(V_{BE1}+\frac{R_{2}}{R_{1}}V_{T}\ln{n} -\left( 1+\frac{R_{2}}{R_{1}}\right) V_{OS}\right)$<br>简单理解此表达式 $V_{BG}&#x3D;\frac{R_{4}}{R_{2}}V_{REF}$，$\frac{R_{4}}{R_{2}}$ 用于调节输出值，而 $\frac{R_{2}}{R_{1}}$ 用于平衡正负温度系数</p>
+<h1 id="启动及稳定性问题"><a href="#启动及稳定性问题" class="headerlink" title="启动及稳定性问题"></a>启动及稳定性问题</h1><h1 id="其他考虑（速度，电源抑制，噪声，输出阻抗）"><a href="#其他考虑（速度，电源抑制，噪声，输出阻抗）" class="headerlink" title="其他考虑（速度，电源抑制，噪声，输出阻抗）"></a>其他考虑（速度，电源抑制，噪声，输出阻抗）</h1><h1 id="实际电路"><a href="#实际电路" class="headerlink" title="实际电路"></a>实际电路</h1><h2 id="电压模"><a href="#电压模" class="headerlink" title="电压模"></a>电压模</h2><p>　　​<img src="/assets/image-20221122165433-gaxopma.png" alt="image">​</p>
+<h2 id="电流模-低压结构"><a href="#电流模-低压结构" class="headerlink" title="电流模 (低压结构)"></a>电流模 (低压结构)</h2><p>　　​<img src="/assets/image-20221122165735-8m9mrdm.png" alt="image">​</p>
+<h1 id="高阶运用"><a href="#高阶运用" class="headerlink" title="高阶运用"></a>高阶运用</h1><p>　　源自 2011 年 JSSC 的一篇 bandgap 设计经典论文<strong>“A Single-Trim CMOS Bandgap Reference With a 3δ Inaccuracy of 0.15% From 40C to 125C”（代尔夫特的大佬们，膜）</strong>​<a href="assets/Bandgap_Ge_JSSC2011-20221120111908-x8ht5an.pdf">Bandgap_Ge_JSSC2011.pdf</a></p>
+<p>　　国内博客也有一些写的很好的文章解读<br><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/576098454">https://zhuanlan.zhihu.com/p/576098454</a><br><a target="_blank" rel="noopener" href="https://blog.eetop.cn/blog-1395527-6946327.html">https://blog.eetop.cn/blog-1395527-6946327.html</a></p>
+<h2 id="Trimming"><a href="#Trimming" class="headerlink" title="Trimming"></a>Trimming</h2><p>　　根据这篇论文，仅用单点校准（Single-Trim）</p>
+<h2 id="Curvature-Correction"><a href="#Curvature-Correction" class="headerlink" title="Curvature Correction"></a>Curvature Correction</h2><p>　　也叫二阶温度系数补偿（待补充）</p>
+<h2 id="Offset-Cancellation-Chopping-Technique"><a href="#Offset-Cancellation-Chopping-Technique" class="headerlink" title="Offset Cancellation - Chopping Technique"></a>Offset Cancellation - Chopping Technique</h2><p>　　Chopping 的原理：周期性的将运放输入端交换，同时保证运放的正负反馈极性不变<br><img src="/assets/net-img-1668343580573-1014e271-6a62-4c42-9beb-b1b7707f0fb6-20221118131511-0rb604n.png" alt="image.png"><br>以全差分折叠式共源共栅为例<br><img src="/assets/net-img-1668343798589-d88aa5aa-995c-4274-bdd3-990a6aa2b05a-20221118131511-pe8j874.png" alt="image.png"><br><img src="/assets/net-img-1668343829428-05cd5069-d263-4e55-a78a-e8f903cdf826-20221118131511-xe4md0z.png" alt="image.png"></p>
+<p>　　‍</p>
+<p>　　但是由于时钟的引入和运放极性的周期性变换，运放的输出端会产生一个ripple，不过这个ripple的频率是已知的，所以</p>
+<p>　　‍</p>
+<h1 id="常见问题和总结"><a href="#常见问题和总结" class="headerlink" title="常见问题和总结"></a>常见问题和总结</h1><p>　　Q1: 为什么<strong>低压结构</strong>的启动电路更难做<br>A1: 因为对电流的大小有比较严格的要求，当电流较小的时候，电流只能通过电阻，此时 BJT 未开启，于是运放输入两端难以形成负反馈 &gt; 正反馈</p>
+<p>　　Q2: 输出的精度会被哪些因素影响，应该怎么改善<br>A2: 按照元器件来分，有如下几个方面</p>
+<ul>
+<li><strong>运放的offset</strong>，这是最大的影响，源于运放内部的对管在生产过程中产生的不匹配。从最基础的运放设计来说，运放 offset 输出管可以做大，以减少边缘效应，然后合理的版图摆放也是必不可少。但想要真正消除 offset，就得用上 chopper</li>
+<li><strong>运放增益过小</strong>导致运放输入正负端电压差太大。运放的增益至少要 40dB 以上，单级的 Folded-Cascode 就可以达到</li>
+<li><strong>电流镜的不匹配</strong>，源自沟道长度调制效应 (Channel Length Modulation)，从电路的角度去理解就是输出阻抗太小，应该增大沟道长度 L（还对 Vth 的失配有好处），还可以做成 Cascode 结构。</li>
+<li><strong>BJT的不匹配</strong>，BJT 的放大系数 β 值，详见高阶应用-Curvature Correction（待补充）</li>
+</ul>
+<p>　　Q3: 噪声应该怎么减小<br>A3: 输出端应该挂电容以减少高频噪声；电流镜的 Gate 端挂 RC 滤掉闪烁噪声</p>
+<p>　　Q4: 为啥 Bandgap 仿真温漂的时候，是个抛物线<strong>开口向下</strong>的曲线？</p>
+<p>　　Q4: BJT 能不能换成二极管？</p>
+<p>　　Q5: 运放为啥要单级运放？能不能用二级运放？对带宽有无要求？</p>
+<p>　　‍</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/11/25/Chapter%2012%20Bandgap/" data-id="claw3jqvp0000tsmm5koxalzi" data-title="" class="article-share-link">分享</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-前言" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/11/25/%E5%89%8D%E8%A8%80/" class="article-date">
+  <time class="dt-published" datetime="2022-11-25T06:00:20.941Z" itemprop="datePublished">2022-11-25</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2022/11/25/%E5%89%8D%E8%A8%80/">前言</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>　　一位23年毕业的硕士的模拟IC学习笔记。</p>
+<p>　　关于写博客的契机</p>
+<p>　　那时候我还在新加坡留学，在一家本地企业实习，还在为了进入IC行业昼夜不停的跑仿真学理论。在那里我遇到了宇文青霜本人，当时还不认识，只知道她是芯片设计部门的人，于是向她讨教了一个困扰我一周的Bandgap基础问题。我被她的逻辑通畅性，思维严密性深深折服了，跟她聊了十几分钟抵得上我个人想一周。然后我就去翻她写过的文章，简直太好懂了。大概真的只有把学过的知识给新人讲明白，自己才算彻底理解了。想起我一开始找工作的时候，叽里呱啦说一大堆面试官都听不懂的丢人时刻，还是觉得自己也得写点东西才能捋顺自己的知识体系。</p>
+<p>　　‍</p>
+<p>　　这里向所有模拟IC工程师推荐宇文青霜的文章</p>
+<p>　　知乎：宇文青霜</p>
+<p>　　微信公众号：通向模拟集成电路设计师之路</p>
+<p>　　‍</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/11/25/%E5%89%8D%E8%A8%80/" data-id="claw3jqvs0001tsmmdcpk8nxf" data-title="前言" class="article-share-link">分享</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
   
     <article id="post-hello-world" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
@@ -110,7 +249,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/11/25/hello-world/" data-id="claw1dy9i0000mgmm5bvy73x1" data-title="Hello World" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/11/25/hello-world/" data-id="claw1dy9i0000mgmm5bvy73x1" data-title="Hello World" class="article-share-link">分享</a>
       
       
       
@@ -138,9 +277,9 @@
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Archives</h3>
+    <h3 class="widget-title">归档</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/11/">November 2022</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/11/">十一月 2022</a></li></ul>
     </div>
   </div>
 
@@ -148,9 +287,17 @@
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Recent Posts</h3>
+    <h3 class="widget-title">最新文章</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2022/11/25/Chapter%2012%20Bandgap/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2022/11/25/%E5%89%8D%E8%A8%80/">前言</a>
+          </li>
         
           <li>
             <a href="/2022/11/25/hello-world/">Hello World</a>
@@ -169,7 +316,7 @@
   <div class="outer">
     <div id="footer-info" class="inner">
       
-      &copy; 2022 John Doe<br>
+      &copy; 2022 NighCat-Senpai<br>
       Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
     </div>
   </div>
